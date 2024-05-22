@@ -1,6 +1,6 @@
 services:
   dw:
-    image: postgres:14
+    image: postgres:15
     environment:
       POSTGRES_USER: dw
       POSTGRES_PASSWORD: dw12345
@@ -8,10 +8,6 @@ services:
   
   airflow:
     build: ./airflow
-    command: standalone
+    command: bash -c "airflow db migrate && airflow users create --username airflow --firstname airflow --lastname airflow --role Admin --email airflow@airflow --password airflow && airflow standalone"
     ports:
       - 8080:8080
-    environment:
-      _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
