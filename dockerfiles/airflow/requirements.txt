@@ -1,2 +1,9 @@
 apache-airflow-providers-apache-spark
+apache-airflow-providers-papermill
+apache-airflow-providers-postgres
 pyspark
+pandas
+requests
+bs4
+lxml
+openpyxl
