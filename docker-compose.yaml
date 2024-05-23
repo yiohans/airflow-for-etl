@@ -7,7 +7,10 @@ services:
       POSTGRES_DB: dw
   
   airflow:
-    build: ./airflow
+    build: ./dockerfiles/airflow
     command: bash -c "airflow db migrate && airflow users create --username airflow --firstname airflow --lastname airflow --role Admin --email airflow@airflow --password airflow && airflow standalone"
     ports:
       - 8080:8080
+    volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
