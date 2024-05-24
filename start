@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ ! -d "./logs" ]; then
+    mkdir logs
+fi
+sudo chown -R 1000 ./logs
+sudo chmod -R 777 ./logs
+sudo chown -R 1000 ./dags
+sudo chmod -R 777 ./dags
+docker compose up -d --build
