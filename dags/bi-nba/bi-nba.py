@@ -46,6 +46,7 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
         from airflow.models.connection import Connection
         conn = PostgresHook(postgres_conn_id).get_conn()
         df = pd.read_csv(file_path)
+        print(df.columns)
         print(df.head(5))
         buffer = io.StringIO()
         df.to_csv(buffer, sep=";", index=False, header=False, encoding='utf-8')
@@ -121,8 +122,9 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
             CREATE TABLE IF NOT EXISTS fato_nba (
             games INTEGER,
             minutes INTEGER,
-            assists INTEGER,
             rebounds INTEGER,
+            assists INTEGER,
+            steals INTEGER,
             blocks INTEGER,
             points INTEGER,
             sk_ano INTEGER,
