@@ -1,3 +1,6 @@
 __pycache__
 logs
 dw-data
+*_output.ipynb
+csv_files
+xlsx_files
