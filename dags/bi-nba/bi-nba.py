@@ -1,9 +1,11 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.provider.postgres.hooks.postgres import PostgresHook
 from pendulum import datetime, duration
 import psycopg2
 import papermill as pm
+import io
 
 default_args = {
     'owner': 'airflow',
@@ -41,37 +43,30 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
     def load(postgres_conn_id : str, table_name : str, file_path : str):
         print("Load data to database")
         import pandas as pd
-        from sqlalchemy import create_engine
-        import os
 
         from airflow.models.connection import Connection
-        conn = Connection.get_connection_from_secrets(postgres_conn_id)
-        conn_uri = conn.get_uri()
-        conn_uri = conn_uri.replace("postgres://", "postgresql+psycopg2://")
-        print (conn_uri)
-        engine = create_engine(conn_uri)
+        conn = PostgresHook(postgres_conn_id).get_conn()
         df = pd.read_csv(file_path)
         print(df.head(5))
-        if len(df) > 0:
-            colunas_df = list(df)
-            # cria (coluna1, coluna2, ...)
-            colunas = ', '.join(colunas_df)
-
-            # Cria VALUES (%s, %s, ...) para cada coluna
-            valores = "VALUES({})".format(", ".join(["%s" for _ in colunas_df]))
-
-            # Cria INSERT INTO tabela (coluna1, coluna2, ...) VALUES (%s, %s, ...)
-            insert = "INSERT INTO {} ({}) {}".format(table_name, colunas, valores)
-
-            conn = engine.raw_connection()
-            cursor = conn.cursor()
-            psycopg2.extras.execute_batch(cursor, insert, df.values)
-            conn.commit()
-            cursor.close()
-            
-
-        # with engine.connect() as conn:
-        #     df.to_sql(table_name, con=conn, if_exists='replace', index=False)
+        buffer = io.StringIO()
+        df.to_csv(buffer, sep=";", index=False, header=False, encoding='utf-8')
+        buffer.seek(0)
+        cursor = conn.cursor()
+        cursor.copy_expert(
+            f"""
+            COPY nba.{table_name}
+            FROM STDIN
+            WITH
+                (
+                    FORMAT CSV,
+                    DELIMITER E';',
+                    HEADER FALSE
+                )
+            """,
+            buffer
+        )
+        conn.commit()
+        conn.close()
 
     load_dim_jogador = PythonOperator(
         task_id='load_dim_jogador',
