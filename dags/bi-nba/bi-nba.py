@@ -1,9 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
-from airflow.provider.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from pendulum import datetime, duration
-import psycopg2
 import papermill as pm
 import io
 
