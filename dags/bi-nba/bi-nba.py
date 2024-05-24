@@ -119,14 +119,14 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
             );
             DROP TABLE IF EXISTS nba.fato_nba;
             CREATE TABLE IF NOT EXISTS fato_nba (
-            sk_ano INTEGER,
-            sk_jogador INTEGER,
-            assists INTEGER,
-            blocks INTEGER,
             games INTEGER,
             minutes INTEGER,
+            assists INTEGER,
+            rebounds INTEGER,
+            blocks INTEGER,
             points INTEGER,
-            rebounds INTEGER
+            sk_ano INTEGER,
+            sk_jogador INTEGER
             )
             ;""",
         conn_id='nba_conn',
