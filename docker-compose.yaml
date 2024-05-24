@@ -5,6 +5,8 @@ services:
       POSTGRES_USER: nba
       POSTGRES_PASSWORD: nba12345
       POSTGRES_DB: nba
+    volumes:
+      - ./dw-data:/var/lib/postgresql/data
     ports:
       - "65432:5432"
   

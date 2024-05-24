@@ -1,2 +1,6 @@
 __pycache__
-logs/*
+logs
+dw-data
+*_output.ipynb
+csv_files
+xlsx_files
