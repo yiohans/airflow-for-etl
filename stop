@@ -1,0 +1,5 @@
+#!/bin/bash
+docker compose down
+if [ -d "./logs" ]; then
+    sudo rm -r ./logs
+fi

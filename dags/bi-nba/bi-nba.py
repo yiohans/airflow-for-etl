@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from pendulum import datetime, duration
+import psycopg2
 import papermill as pm
 
 default_args = {
@@ -51,7 +52,26 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
         engine = create_engine(conn_uri)
         df = pd.read_csv(file_path)
         print(df.head(5))
-        df.to_sql(table_name, engine, if_exists='replace', index=False)
+        if len(df) > 0:
+            colunas_df = list(df)
+            # cria (coluna1, coluna2, ...)
+            colunas = ', '.join(colunas_df)
+
+            # Cria VALUES (%s, %s, ...) para cada coluna
+            valores = "VALUES({})".format(", ".join(["%s" for _ in colunas_df]))
+
+            # Cria INSERT INTO tabela (coluna1, coluna2, ...) VALUES (%s, %s, ...)
+            insert = "INSERT INTO {} ({}) {}".format(table_name, colunas, valores)
+
+            conn = engine.raw_connection()
+            cursor = conn.cursor()
+            psycopg2.extras.execute_batch(cursor, insert, df.values)
+            conn.commit()
+            cursor.close()
+            
+
+        # with engine.connect() as conn:
+        #     df.to_sql(table_name, con=conn, if_exists='replace', index=False)
 
     load_dim_jogador = PythonOperator(
         task_id='load_dim_jogador',
