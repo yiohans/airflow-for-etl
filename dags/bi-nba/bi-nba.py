@@ -1,9 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
-from airflow.provider.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from pendulum import datetime, duration
-import psycopg2
 import papermill as pm
 import io
 
@@ -47,6 +46,7 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
         from airflow.models.connection import Connection
         conn = PostgresHook(postgres_conn_id).get_conn()
         df = pd.read_csv(file_path)
+        print(df.columns)
         print(df.head(5))
         buffer = io.StringIO()
         df.to_csv(buffer, sep=";", index=False, header=False, encoding='utf-8')
@@ -120,14 +120,15 @@ with DAG('bi-nba', default_args=default_args, schedule_interval='@daily',
             );
             DROP TABLE IF EXISTS nba.fato_nba;
             CREATE TABLE IF NOT EXISTS fato_nba (
-            sk_ano INTEGER,
-            sk_jogador INTEGER,
-            assists INTEGER,
-            blocks INTEGER,
             games INTEGER,
             minutes INTEGER,
+            rebounds INTEGER,
+            assists INTEGER,
+            steals INTEGER,
+            blocks INTEGER,
             points INTEGER,
-            rebounds INTEGER
+            sk_ano INTEGER,
+            sk_jogador INTEGER
             )
             ;""",
         conn_id='nba_conn',
